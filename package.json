@@ -1,0 +1,15 @@
+{
+  "name": "gh-dash",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/hankmccoy/gh-dash",
+  "author": "Thomas Beirne <thomas.beirne@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "lodash": "^4.17.4",
+    "mongodb": "^2.2.27",
+    "querystring": "^0.2.0",
+    "superagent": "^3.5.2",
+    "superagent-promise": "^1.1.0"
+  }
+}
