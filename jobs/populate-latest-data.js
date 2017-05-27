@@ -1,7 +1,6 @@
 #! /usr/bin/env node
 'use strict'
 const MongoClient = require('mongodb').MongoClient
-const assert = require('assert')
 const _ = require('lodash')
 const compact = require('lodash/fp/compact')
 const flow = require('lodash/fp/flow')
@@ -43,8 +42,8 @@ function getPrNumbers() {
   return getGhJson({
     path: 'pulls',
     query: {
-      per_page: '100',
-      /* state: 'all', */
+      per_page: '30',
+      state: 'all',
     },
   }).then(prs => prs.map(pr => pr.number))
 }
@@ -65,29 +64,59 @@ function getActualPrsWithEvents(prNumbers) {
   )
 }
 
-const isGtg = event => _.get(event, 'label.name') === 'good to go'
-const getLastGtgEvent = events => _.last(events.filter(isGtg))
+const filterEventsByLabel = (events, label) =>
+  events.filter(e => _.get(e, 'label.name') === label)
+const getLastGtgEvent = events =>
+  _.last(filterEventsByLabel(events, 'good to go'))
+
+const getDateCreated = event => (event ? new Date(event.created_at) : null)
 
 function createFinalPrObjs(prsAndEvents) {
   return prsAndEvents.map(thing => {
     const { pr, events = [] } = thing
     const gtgEvent = getLastGtgEvent(events)
-    const commenters = _.uniq(
-      events.filter(e => e.event === 'commented').map(e => e.actor.login)
+    const dateGtG = getDateCreated(gtgEvent)
+    const dateMerged = pr.merged_at ? new Date(pr.merged_at) : null
+    const commentEvents = events.filter(e => e.event === 'commented')
+    const commenters = _.uniq(commentEvents.map(e => e.actor.login))
+    const needsReviewEvents = filterEventsByLabel(events, 'needs review')
+    const needsRevisionEvents = filterEventsByLabel(
+      events,
+      'needs revision/discussion'
     )
-    const needsRevisionEvents = events.filter(
-      e => _.get(e, 'label.name') === 'needs revision/discussion'
-    )
+    const firstNeedsReviewEvent = _.first(needsReviewEvents)
+    const dateFirstNeedsReview = getDateCreated(firstNeedsReviewEvent)
 
     const firstReviewLabelChangeEvent = flow(
       compact,
       sortBy('created_at'),
       first
     )([gtgEvent].concat(needsRevisionEvents))
+    const dateFirstReviewLabelChanged = getDateCreated(
+      firstReviewLabelChangeEvent
+    )
+
+    let waitingForReview = null
+    let spentInReview = null
+    let afterReviewBeforeMerge = null
+
+    if (dateFirstReviewLabelChanged && dateFirstNeedsReview) {
+      waitingForReview = dateFirstReviewLabelChanged - dateFirstNeedsReview
+    }
+
+    if (dateFirstReviewLabelChanged && dateGtG) {
+      spentInReview = dateGtG - dateFirstReviewLabelChanged
+    }
+
+    if (dateMerged && dateGtG) {
+      afterReviewBeforeMerge = dateMerged - dateGtG
+    }
 
     return {
       id: pr.id,
       number: pr.number,
+      title: pr.title,
+      body: pr.body,
       author: pr.user.login,
       additions: pr.additions,
       deletions: pr.deletions,
@@ -98,9 +127,9 @@ function createFinalPrObjs(prsAndEvents) {
       commenters,
       numRevisions: needsRevisionEvents.length,
       times: {
-        waitingForReview: null,
-        spentInReview: null,
-        afterReviewBeforeMerge: null,
+        waitingForReview,
+        spentInReview,
+        afterReviewBeforeMerge,
       },
     }
   })
@@ -109,21 +138,26 @@ function createFinalPrObjs(prsAndEvents) {
 // Use connect method to connect to the server
 MongoClient.connect(mongoConnectionStr).then(
   db => {
-    console.log('Connected successfully to server')
+    console.log('Connected successfully to db')
 
     const getProcessedPrsPromise = getProcessedPrs()
-    getProcessedPrsPromise.then(
-      finalPrs => {
-        console.log(finalPrs)
-        db.close()
-      },
-      err => {
+    Promise.all([
+      getProcessedPrsPromise,
+      db.collection('pullRequests').deleteMany({}),
+    ])
+      .then(([finalPrs]) => {
+        return db.collection('pullRequests').insertMany(finalPrs)
+      })
+      .then(results => {
+        console.log(`Inserted ${results.result.n} docs into the collection`)
+        return results
+      })
+      .catch(err => {
         console.error(err)
-        db.close()
-      }
-    )
+      })
+      .then(() => db.close())
   },
   err => {
-    assert.equal(null, err)
+    console.error(err)
   }
 )
