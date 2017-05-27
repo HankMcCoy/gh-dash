@@ -31,7 +31,9 @@ const getGhJson = ({ path, query }) => {
     ? `${queryStr}&access_token=${token}`
     : `access_token=${token}`
 
-  return getJson(`${repoUrl}/${path}?${queryStr}`)
+  return path.startsWith('/')
+    ? getJson(`${api}${path}?${queryStr}`)
+    : getJson(`${repoUrl}/${path}?${queryStr}`)
 }
 
 function getProcessedPrs() {
@@ -42,7 +44,7 @@ function getPrNumbers() {
   return getGhJson({
     path: 'pulls',
     query: {
-      per_page: '30',
+      per_page: '80',
       state: 'all',
     },
   }).then(prs => prs.map(pr => pr.number))
@@ -135,15 +137,18 @@ function createFinalPrObjs(prsAndEvents) {
   })
 }
 
+const getProcessedPrsPromise = getProcessedPrs()
 // Use connect method to connect to the server
 MongoClient.connect(mongoConnectionStr).then(
   db => {
     console.log('Connected successfully to db')
 
-    const getProcessedPrsPromise = getProcessedPrs()
     Promise.all([
       getProcessedPrsPromise,
       db.collection('pullRequests').deleteMany({}),
+      getGhJson({ path: '/rate_limit' }).then(rateLimit => {
+        console.log(rateLimit)
+      }),
     ])
       .then(([finalPrs]) => {
         return db.collection('pullRequests').insertMany(finalPrs)
