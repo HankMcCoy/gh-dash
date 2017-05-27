@@ -18,8 +18,14 @@ const repo = 'client'
 const token = process.env.GH_TOKEN
 const api = 'https://api.github.com'
 const repoUrl = `${api}/repos/${org}/${repo}`
+
 const getJson = url =>
-  (console.log(url), request.get(url).end().then(res => res.body))
+  request
+    .get(url)
+    .set('Accept', 'application/vnd.github.mockingbird-preview')
+    .end()
+    .then(res => res.body)
+
 const getGhJson = ({ path, query }) => {
   let queryStr = querystring.stringify(query)
   queryStr = queryStr
@@ -30,20 +36,20 @@ const getGhJson = ({ path, query }) => {
 }
 
 function getProcessedPrs() {
-  console.log('GETPROCESSED')
   return getPrNumbers().then(getActualPrsWithEvents).then(createFinalPrObjs)
 }
 
 function getPrNumbers() {
-  console.log('GET NUMS')
   return getGhJson({
     path: 'pulls',
-    query: { per_page: '100' },
+    query: {
+      per_page: '100',
+      /* state: 'all', */
+    },
   }).then(prs => prs.map(pr => pr.number))
 }
 
 function getActualPrsWithEvents(prNumbers) {
-  console.log('GET ACTUAL')
   return Promise.all(
     prNumbers.map(number =>
       Promise.all([
@@ -51,7 +57,7 @@ function getActualPrsWithEvents(prNumbers) {
           path: `pulls/${number}`,
         }),
         getGhJson({
-          path: `issues/${number}/events`,
+          path: `issues/${number}/timeline`,
           query: { per_page: '100' },
         }),
       ]).then(([pr, events]) => ({ pr, events }))
@@ -63,17 +69,16 @@ const isGtg = event => _.get(event, 'label.name') === 'good to go'
 const getLastGtgEvent = events => _.last(events.filter(isGtg))
 
 function createFinalPrObjs(prsAndEvents) {
-  console.log('CREATE FINAL', prsAndEvents.length)
   return prsAndEvents.map(thing => {
-    console.log('THING', thing)
     const { pr, events = [] } = thing
     const gtgEvent = getLastGtgEvent(events)
     const commenters = _.uniq(
-      events.map(e => _.get(e, 'comment.user.login')).filter(x => x)
+      events.filter(e => e.event === 'commented').map(e => e.actor.login)
     )
     const needsRevisionEvents = events.filter(
       e => _.get(e, 'label.name') === 'needs revision/discussion'
     )
+
     const firstReviewLabelChangeEvent = flow(
       compact,
       sortBy('created_at'),
