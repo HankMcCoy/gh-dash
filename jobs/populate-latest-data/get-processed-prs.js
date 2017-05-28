@@ -8,15 +8,18 @@ const first = require('lodash/fp/first')
 
 const { getGhJson } = require('./xhr')
 
-function getProcessedPrs() {
-  return getPrNumbers().then(getActualPrsWithEvents).then(createFinalPrObjs)
+function getProcessedPrs({ page, perPage }) {
+  return getPrNumbers({ page, perPage })
+    .then(getActualPrsWithEvents)
+    .then(createFinalPrObjs)
 }
 
-function getPrNumbers() {
+function getPrNumbers({ page, perPage }) {
   return getGhJson({
     path: 'pulls',
     query: {
-      per_page: '80',
+      page,
+      per_page: perPage,
       state: 'all',
     },
   }).then(prs => prs.map(pr => pr.number))

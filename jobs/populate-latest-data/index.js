@@ -9,7 +9,11 @@ const { getGhJson } = require('./xhr')
 // Connection URL
 const mongoConnectionStr = 'mongodb://localhost:27017/gh-dash'
 
-const getProcessedPrsPromise = getProcessedPrs()
+const getProcessedPrsPromise = getProcessedPrs({
+  page: 1,
+  perPage: 50,
+})
+
 // Use connect method to connect to the server
 MongoClient.connect(mongoConnectionStr)
   .then(db => {
