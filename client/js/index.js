@@ -19,12 +19,27 @@ function renderPrs(prs) {
 }
 
 function renderPr(pr) {
+  const additionalCommenters = pr.commenters.filter(
+    c => c !== pr.author && c !== pr.gtgReviewer
+  )
+
   return `
     <div class="pr">
       <h2>${pr.title}</h2>
       <div>
         <span class="additions">+${pr.additions}</span>,
         <span class="deletions">-${pr.deletions}</span>
+      </div>
+      <div>
+        Author: ${pr.author}
+      </div>
+      ${pr.gtgReviewer ? `
+          <div>
+            Reviewer: ${pr.gtgReviewer}
+          </div>
+        ` : ''}
+      <div>
+        ${additionalCommenters.length ? `Additional commenters: ${additionalCommenters.join(', ')}` : ''}
       </div>
       <div>
         ${pr.times.waitingForReview ? `Waited ${renderTimespan(pr.times.waitingForReview)} for review` : ''}
