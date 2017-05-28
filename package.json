@@ -6,6 +6,7 @@
   "author": "Thomas Beirne <thomas.beirne@gmail.com>",
   "license": "MIT",
   "dependencies": {
+    "express": "^4.15.3",
     "lodash": "^4.17.4",
     "mongodb": "^2.2.27",
     "querystring": "^0.2.0",
@@ -13,6 +14,7 @@
     "superagent-promise": "^1.1.0"
   },
   "scripts": {
+    "start:server": "node ./server/index.js",
     "populate": "./jobs/populate-latest-data/index.js"
   }
 }
