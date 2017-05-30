@@ -19,6 +19,36 @@ app.get('/api/pull-requests', (req, res) => {
   })
 })
 
+app.get('/api/review-times', (req, res) => {
+  const weekInMs = 1000 * 60 * 60 * 24 * 7
+  const fiveWeeksAgo = new Date(Date.now() - 5 * weekInMs)
+
+  db
+    .collection('pullRequests')
+    .aggregate([
+      {
+        $match: {
+          dateMerged: { $gt: fiveWeeksAgo },
+        },
+      },
+      {
+        $group: {
+          _id: { $week: '$dateMerged' },
+          avgTimeWaitingForReview: {
+            $avg: '$times.waitingForReview',
+          },
+        },
+      },
+    ])
+    .toArray((err, results) => {
+      if (err) {
+        res.send(err)
+      } else {
+        res.send({ reviewTimes: { waitingForReview: results } })
+      }
+    })
+})
+
 MongoClient.connect(mongoConnectionStr).then(dbConnection => {
   console.log('Connected to Mongo')
   db = dbConnection
