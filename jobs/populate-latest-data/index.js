@@ -3,6 +3,7 @@
 const MongoClient = require('mongodb').MongoClient
 const _ = require('lodash')
 
+const delay = require('./delay')
 const getProcessedPrs = require('./get-processed-prs')
 const { getGhUrl, getGhJson } = require('./xhr')
 
@@ -35,7 +36,7 @@ MongoClient.connect(mongoConnectionStr)
 const initialUrl = getGhUrl({
   path: 'pulls',
   query: {
-    per_page: 50,
+    per_page: 10,
     state: 'all',
   },
 })
@@ -47,5 +48,6 @@ function populatePrs({ db, url = initialUrl }) {
         return next
       })
     })
+    .then(delay(2000))
     .then(next => (next ? populatePrs({ db, url: next.url }) : null))
 }

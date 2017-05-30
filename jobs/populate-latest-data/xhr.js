@@ -15,10 +15,39 @@ const getJson = url =>
     .get(url)
     .set('Accept', 'application/vnd.github.mockingbird-preview')
     .end()
-    .then(res => ({
-      headers: res.header,
-      body: res.body,
-    }))
+    .then(
+      res => ({
+        headers: res.header,
+        body: res.body,
+      }),
+      err => {
+        if (!err.response) {
+          throw err
+        }
+
+        const retryAfter = +err.response.header['retry-after']
+        const remaining = err.response.header['x-ratelimit-remaining']
+        const reset = +err.response.header['x-ratelimit-reset']
+        const resetDate = new Date(reset * 1000)
+        const msDiff = resetDate - new Date()
+
+        if (retryAfter) {
+          return new Promise(resolve => {
+            console.log(`Hit abuse detection, waiting ${retryAfter} seconds`)
+            setTimeout(() => resolve(getJson(url)), retryAfter * 1000)
+          })
+        }
+        if (remaining) {
+          return new Promise(resolve => {
+            console.log(
+              `Rate limit hit, waiting ${Math.round(msDiff / 1000)} seconds`
+            )
+            setTimeout(() => resolve(getJson(url)), msDiff)
+          })
+        }
+        return Promise.reject(err)
+      }
+    )
 exports.getJson = getJson
 
 const getGhUrl = ({ path, query }) => {

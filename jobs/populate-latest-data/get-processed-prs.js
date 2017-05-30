@@ -54,7 +54,6 @@ const getLastGtgEvent = events =>
 const getDateCreated = event => (event ? new Date(event.created_at) : null)
 
 function createFinalPrObjs(prsAndEvents) {
-  console.log('FINALIZING')
   return prsAndEvents.map(thing => {
     const { pr, events = [] } = thing
     const gtgEvent = getLastGtgEvent(events)
