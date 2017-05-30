@@ -54,6 +54,8 @@ function createFinalPrObjs(prsAndEvents) {
     const gtgEvent = getLastGtgEvent(events)
     const dateGtG = getDateCreated(gtgEvent)
     const dateMerged = pr.merged_at ? new Date(pr.merged_at) : null
+    const dateClosed = pr.closed_at ? new Date(pr.closed_at) : null
+    const dateCreated = pr.created_at ? new Date(pr.created_at) : null
     const commentEvents = events.filter(e => e.event === 'commented')
     const commenters = _.uniq(commentEvents.map(e => e.actor.login))
     const needsReviewEvents = filterEventsByLabel(events, 'needs review')
@@ -97,9 +99,9 @@ function createFinalPrObjs(prsAndEvents) {
       author: pr.user.login,
       additions: pr.additions,
       deletions: pr.deletions,
-      dateCreated: pr.created_at,
-      dateClosed: pr.closed_at,
-      dateMerged: pr.merged_at,
+      dateCreated,
+      dateClosed,
+      dateMerged,
       gtgReviewer: gtgEvent && gtgEvent.actor.login,
       commenters,
       numRevisions: needsRevisionEvents.length,
