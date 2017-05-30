@@ -28,7 +28,7 @@
     "webpack-dev-server": "^2.4.5"
   },
   "scripts": {
-    "start:server": "nodemon ./server/index.js",
+    "start:server": "nodemon --watch server ./server/index.js",
     "start:client": "webpack-dev-server",
     "populate": "./jobs/populate-latest-data/index.js"
   }
