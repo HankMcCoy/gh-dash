@@ -1,5 +1,6 @@
 'use strict'
 
+const parseLinkHeader = require('parse-link-header')
 const request = require('superagent-promise')(require('superagent'), Promise)
 const querystring = require('querystring')
 
@@ -14,15 +15,26 @@ const getJson = url =>
     .get(url)
     .set('Accept', 'application/vnd.github.mockingbird-preview')
     .end()
-    .then(res => res.body)
+    .then(res => ({
+      headers: res.header,
+      body: res.body,
+    }))
+exports.getJson = getJson
 
-exports.getGhJson = ({ path, query }) => {
+const getGhUrl = ({ path, query }) => {
   let queryStr = querystring.stringify(query)
   queryStr = queryStr
     ? `${queryStr}&access_token=${token}`
     : `access_token=${token}`
 
   return path.startsWith('/')
-    ? getJson(`${api}${path}?${queryStr}`)
-    : getJson(`${repoUrl}/${path}?${queryStr}`)
+    ? `${api}${path}?${queryStr}`
+    : `${repoUrl}/${path}?${queryStr}`
+}
+exports.getGhUrl = getGhUrl
+
+exports.getGhJson = ({ path, query }) => {
+  const url = getGhUrl({ path, query })
+
+  return getJson(url)
 }

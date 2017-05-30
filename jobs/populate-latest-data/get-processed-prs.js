@@ -5,24 +5,29 @@ const compact = require('lodash/fp/compact')
 const flow = require('lodash/fp/flow')
 const sortBy = require('lodash/fp/sortBy')
 const first = require('lodash/fp/first')
+const parseLinkHeader = require('parse-link-header')
 
-const { getGhJson } = require('./xhr')
+const { getJson, getGhJson } = require('./xhr')
 
-function getProcessedPrs({ page, perPage }) {
-  return getPrNumbers({ page, perPage })
-    .then(getActualPrsWithEvents)
+function getProcessedPrs({ url }) {
+  let next
+  return getPrNumbers({ url })
+    .then(({ next: nextArg, numbers }) => {
+      next = nextArg
+      return getActualPrsWithEvents(numbers)
+    })
     .then(createFinalPrObjs)
+    .then(prs => ({ next, prs }))
 }
 
-function getPrNumbers({ page, perPage }) {
-  return getGhJson({
-    path: 'pulls',
-    query: {
-      page,
-      per_page: perPage,
-      state: 'all',
-    },
-  }).then(prs => prs.map(pr => pr.number))
+function getPrNumbers({ url }) {
+  return getJson(url).then(({ headers, body: prs }) => {
+    const next = parseLinkHeader(headers.link).next
+    return {
+      next,
+      numbers: prs.map(pr => pr.number),
+    }
+  })
 }
 
 function getActualPrsWithEvents(prNumbers) {
@@ -31,11 +36,11 @@ function getActualPrsWithEvents(prNumbers) {
       Promise.all([
         getGhJson({
           path: `pulls/${number}`,
-        }),
+        }).then(({ body }) => body),
         getGhJson({
           path: `issues/${number}/timeline`,
           query: { per_page: '100' },
-        }),
+        }).then(({ body }) => body),
       ]).then(([pr, events]) => ({ pr, events }))
     )
   )
@@ -49,6 +54,7 @@ const getLastGtgEvent = events =>
 const getDateCreated = event => (event ? new Date(event.created_at) : null)
 
 function createFinalPrObjs(prsAndEvents) {
+  console.log('FINALIZING')
   return prsAndEvents.map(thing => {
     const { pr, events = [] } = thing
     const gtgEvent = getLastGtgEvent(events)
