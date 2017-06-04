@@ -106,6 +106,24 @@ app.get('/api/revisions-by-reviewer/:reviewer', (req, res) => {
     })
 })
 
+app.get('/api/reviewers', (req, res) => {
+  db
+    .collection('pullRequests')
+    .distinct('gtgReviewer')
+    .then(reviewers => {
+      res.send({ reviewers: reviewers.filter(x => x) })
+    })
+})
+
+app.get('/api/authors', (req, res) => {
+  db
+    .collection('pullRequests')
+    .distinct('author')
+    .then(authors => {
+      res.send({ authors: authors.filter(x => x) })
+    })
+})
+
 MongoClient.connect(mongoConnectionStr).then(
   dbConnection => {
     console.log('Connected to Mongo')
