@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import PullRequests from './pull-requests'
+import RevisionsByReviewer from './revisions-by-reviewer'
 
 class App extends Component {
   state = {
@@ -10,7 +11,10 @@ class App extends Component {
     const { pullRequests } = this.state
 
     const content = pullRequests
-      ? <PullRequests pullRequests={pullRequests} />
+      ? <div>
+          <RevisionsByReviewer />
+          <PullRequests pullRequests={pullRequests} />
+        </div>
       : null
 
     return (
