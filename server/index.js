@@ -49,10 +49,72 @@ app.get('/api/review-times', (req, res) => {
     })
 })
 
-MongoClient.connect(mongoConnectionStr).then(dbConnection => {
-  console.log('Connected to Mongo')
-  db = dbConnection
-  app.listen(3000, () => {
-    console.log('Server started')
-  })
+app.get('/api/revisions-by-author/:author', (req, res) => {
+  const { author } = req.params
+
+  db
+    .collection('pullRequests')
+    .aggregate([
+      {
+        $match: {
+          author,
+          gtgReviewer: { $ne: null },
+        },
+      },
+      {
+        $group: {
+          _id: '$gtgReviewer',
+          numRevisions: { $sum: '$numRevisions' },
+          count: { $sum: 1 },
+        },
+      },
+    ])
+    .toArray((err, results) => {
+      if (err) {
+        res.send(err)
+      } else {
+        res.send({ revisionCounts: results })
+      }
+    })
 })
+
+app.get('/api/revisions-by-reviewer/:reviewer', (req, res) => {
+  const { reviewer } = req.params
+
+  db
+    .collection('pullRequests')
+    .aggregate([
+      {
+        $match: {
+          gtgReviewer: reviewer,
+        },
+      },
+      {
+        $group: {
+          _id: '$author',
+          numRevisions: { $sum: '$numRevisions' },
+          count: { $sum: 1 },
+        },
+      },
+    ])
+    .toArray((err, results) => {
+      if (err) {
+        res.send(err)
+      } else {
+        res.send({ revisionCounts: results })
+      }
+    })
+})
+
+MongoClient.connect(mongoConnectionStr).then(
+  dbConnection => {
+    console.log('Connected to Mongo')
+    db = dbConnection
+    app.listen(3000, () => {
+      console.log('Server started')
+    })
+  },
+  err => {
+    console.error(err)
+  }
+)
