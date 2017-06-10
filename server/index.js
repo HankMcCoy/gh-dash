@@ -73,7 +73,7 @@ app.get('/api/revisions-by-author/:author', (req, res) => {
       if (err) {
         res.send(err)
       } else {
-        res.send({ revisionCounts: results })
+        res.send({ revisionCounts: results.sort(compareByAttr('_id')) })
       }
     })
 })
@@ -101,11 +101,12 @@ app.get('/api/revisions-by-reviewer/:reviewer', (req, res) => {
       if (err) {
         res.send(err)
       } else {
-        res.send({ revisionCounts: results })
+        res.send({ revisionCounts: results.sort(compareByAttr('_id')) })
       }
     })
 })
 
+const compareByAttr = attr => (a, b) => caseInsensitiveCompare(a[attr], b[attr])
 const caseInsensitiveCompare = (a, b) => {
   if (a.toLowerCase() < b.toLowerCase()) {
     return -1

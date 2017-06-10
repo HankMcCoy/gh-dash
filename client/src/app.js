@@ -6,6 +6,7 @@ import SiteHeader from './site-header'
 import SiteContent from './site-content'
 import PullRequests from './pull-requests'
 import RevisionsByReviewer from './revisions-by-reviewer'
+import RevisionsByAuthor from './revisions-by-author'
 
 const App = () => (
   <div>
@@ -14,6 +15,7 @@ const App = () => (
       <Div display="flex">
         <Div flex="1 0 0%">
           <RevisionsByReviewer />
+          <RevisionsByAuthor />
         </Div>
         <Spacer width="20px" />
         <Div flex="1 0 0%">
