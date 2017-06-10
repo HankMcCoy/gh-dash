@@ -4,6 +4,8 @@ import { Div, Select } from 'glamorous'
 import PullRequests from './pull-requests'
 import SectionHeader from './section-header'
 import Heading from './heading'
+import Spacer from './spacer'
+import Table from './table'
 
 class RevisionsByReviewer extends Component {
   state = {
@@ -37,15 +39,24 @@ class RevisionsByReviewer extends Component {
             </Select>
           </Div>
         </SectionHeader>
-        {revisionsByCurrentReviewer.map(({ _id, numRevisions, count }) => {
-          return (
-            <div>
-              <h3>{_id}</h3>
-              <div>Total: {count}</div>
-              <div>Avg rev: {(numRevisions / count).toFixed(2)}</div>
-            </div>
-          )
-        })}
+        <Spacer height="10px" />
+        <Table
+          data={revisionsByCurrentReviewer}
+          columns={[
+            {
+              header: 'Author',
+              renderCell: ({ _id }) => _id,
+              flex: '0 1 150px',
+            },
+            { header: '#', renderCell: ({ count }) => count, flex: '0 0 45px' },
+            {
+              header: 'Avg Revisions',
+              renderCell: ({ count, numRevisions }) =>
+                (numRevisions / count).toFixed(2),
+              flex: '1 0 50px',
+            },
+          ]}
+        />
       </div>
     )
   }
