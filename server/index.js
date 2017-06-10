@@ -106,22 +106,27 @@ app.get('/api/revisions-by-reviewer/:reviewer', (req, res) => {
     })
 })
 
+const caseInsensitiveCompare = (a, b) => {
+  if (a.toLowerCase() < b.toLowerCase()) {
+    return -1
+  } else if (a.toLowerCase() > b.toLowerCase()) {
+    return 1
+  }
+  return 0
+}
+
 app.get('/api/reviewers', (req, res) => {
-  db
-    .collection('pullRequests')
-    .distinct('gtgReviewer')
-    .then(reviewers => {
-      res.send({ reviewers: reviewers.filter(x => x) })
+  db.collection('pullRequests').distinct('gtgReviewer').then(reviewers => {
+    res.send({
+      reviewers: reviewers.filter(x => x).sort(caseInsensitiveCompare),
     })
+  })
 })
 
 app.get('/api/authors', (req, res) => {
-  db
-    .collection('pullRequests')
-    .distinct('author')
-    .then(authors => {
-      res.send({ authors: authors.filter(x => x) })
-    })
+  db.collection('pullRequests').distinct('author').then(authors => {
+    res.send({ authors: authors.filter(x => x).sort(caseInsensitiveCompare) })
+  })
 })
 
 MongoClient.connect(mongoConnectionStr).then(
