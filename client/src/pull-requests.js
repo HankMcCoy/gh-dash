@@ -1,16 +1,36 @@
-import React from 'react'
+import React, { Component } from 'react'
 
 import Pr from './pr'
 import Spacer from './spacer'
+import SectionHeader from './section-header'
 import intersperse from './util/intersperse'
 
-const addMargins = intersperse(i => <Spacer height="20px" key={i} />)
+const addMargins = intersperse(i => <Spacer height="12px" key={i} />)
 
 const PullRequests = ({ pullRequests }) => (
   <div>
-    <h1>Pull Requests</h1>
+    <SectionHeader>Pull Requests</SectionHeader>
+    <Spacer height="10px" />
     {addMargins(pullRequests.map(pr => <Pr pr={pr} key={pr._id} />))}
   </div>
 )
 
-export default PullRequests
+class PullRequestsContainer extends Component {
+  state = { pullRequests: null }
+
+  render() {
+    const { pullRequests } = this.state
+    return pullRequests ? <PullRequests pullRequests={pullRequests} /> : null
+  }
+
+  componentDidMount() {
+    window
+      .fetch('/api/pull-requests')
+      .then(res => res.json())
+      .then(({ pullRequests }) => {
+        this.setState({ pullRequests })
+      })
+  }
+}
+
+export default PullRequestsContainer

@@ -1,5 +1,16 @@
 import React from 'react'
-import { Span } from 'glamorous'
+import glamorous, { Div, Span } from 'glamorous'
+
+import Heading from './heading'
+import Spacer from './spacer'
+
+const Link = glamorous.a({
+  color: '#2A91CC',
+  fontSize: '18px',
+  fontWeight: 'bold',
+  textDecoration: 'none',
+})
+const timeAgo = val => timespan(new Date() - new Date(val))
 
 const Pr = ({ pr }) => {
   const additionalCommenters = pr.commenters.filter(
@@ -7,44 +18,16 @@ const Pr = ({ pr }) => {
   )
 
   return (
-    <div>
-      <h2>{pr.title}</h2>
-      <div>
-        <Additions value={pr.additions} />
-        <Deletions value={pr.deletions} />
-      </div>
-      <div>
-        Author: {pr.author}
-      </div>
-      {pr.gtgReviewer
-        ? <div>
-            Reviewer: ${pr.gtgReviewer}
-          </div>
-        : ''}
-      <div>
-        {additionalCommenters.length
-          ? `Additional commenters: ${additionalCommenters.join(', ')}`
-          : ''}
-      </div>
-      <div>
-        {pr.times.waitingForReview
-          ? `Waited ${timespan(pr.times.waitingForReview)} for review`
-          : ''}
-      </div>
-      <div>
-        {pr.times.spentInReview
-          ? `Review took ${timespan(pr.times.spentInReview)}, `
-          : ''}
-        {pr.numRevisions
-          ? `${pr.numRevisions} revision${pr.numRevisions === 1 ? '' : 's'} requested`
-          : ''}
-      </div>
-      <div>
-        {pr.times.afterReviewBeforeMerge
-          ? `${timespan(pr.times.afterReviewBeforeMerge)} between GtG and merging`
-          : ''}
-      </div>
-    </div>
+    <Div display="flex" flexDirection="column">
+      <Div>
+        <Link href={`/pull-requests/${pr.number}`}>{pr.title}</Link>
+      </Div>
+      <Spacer height="5px" />
+      <Div>
+        <span>opened {timeAgo(pr.dateCreated)} ago by {pr.author}</span>
+        <Additions value={pr.additions} />, <Deletions value={pr.deletions} />
+      </Div>
+    </Div>
   )
 }
 

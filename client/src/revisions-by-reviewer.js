@@ -1,5 +1,9 @@
 import React, { Component } from 'react'
+import { Div, Select } from 'glamorous'
+
 import PullRequests from './pull-requests'
+import SectionHeader from './section-header'
+import Heading from './heading'
 
 class RevisionsByReviewer extends Component {
   state = {
@@ -14,11 +18,25 @@ class RevisionsByReviewer extends Component {
 
     return (
       <div>
-        <h1>Revisions by reviewer</h1>
-        <select value={reviewer} onChange={this.handleReviewerChange}>
-          <option></option>
-          {reviewers.map(r => <option value={r}>{r}</option>)}
-        </select>
+        <SectionHeader>
+          <Div
+            alignItems="center"
+            display="flex"
+            justifyContent="space-between"
+            width="100%"
+          >
+            <Heading type="primary">Revisions by reviewer:</Heading>
+            <Select
+              value={reviewer}
+              onChange={this.handleReviewerChange}
+              height="30px"
+              fontSize="18px"
+            >
+              <option />
+              {reviewers.map(r => <option value={r}>{r}</option>)}
+            </Select>
+          </Div>
+        </SectionHeader>
         {revisionsByCurrentReviewer.map(({ _id, numRevisions, count }) => {
           return (
             <div>

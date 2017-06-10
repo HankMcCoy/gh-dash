@@ -1,44 +1,35 @@
 import React, { Component } from 'react'
+import { Div } from 'glamorous'
+
+import Spacer from './spacer'
+import SiteHeader from './site-header'
+import SiteContent from './site-content'
 import PullRequests from './pull-requests'
 import RevisionsByReviewer from './revisions-by-reviewer'
 
-class App extends Component {
-  state = {
-    pullRequests: undefined,
-  }
-
-  render() {
-    const { pullRequests } = this.state
-
-    const content = pullRequests
-      ? <div>
+const App = () => (
+  <div>
+    <SiteHeader />
+    <SiteContent>
+      <Div display="flex">
+        <Div flex="1 0 0%">
           <RevisionsByReviewer />
-          <PullRequests pullRequests={pullRequests} />
-        </div>
-      : null
-
-    return (
-      <div>
-        {content}
-        <style>
-          {`
+        </Div>
+        <Spacer width="20px" />
+        <Div flex="1 0 0%">
+          <PullRequests />
+        </Div>
+      </Div>
+    </SiteContent>
+    <style>
+      {`
 body {
-  font-family: sans-serif;
+  font-family: 'Roboto', sans-serif;
+  margin: 0;
 }
           `}
-        </style>
-      </div>
-    )
-  }
-
-  componentDidMount() {
-    window
-      .fetch('/api/pull-requests')
-      .then(res => res.json())
-      .then(({ pullRequests }) => {
-        this.setState({ pullRequests })
-      })
-  }
-}
+    </style>
+  </div>
+)
 
 export default App
