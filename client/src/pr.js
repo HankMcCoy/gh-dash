@@ -24,14 +24,14 @@ const Pr = ({ pr }) => {
       </Div>
       <Spacer height="5px" />
       <Div>
-        <span>opened {timeAgo(pr.dateCreated)} ago by {pr.author}</span>
+        <span>opened {timeAgo(pr.dateCreated)} ago by {pr.author} </span>
         <Additions value={pr.additions} />, <Deletions value={pr.deletions} />
       </Div>
     </Div>
   )
 }
 
-const Additions = ({ value }) => <Span color="#0f0">+{value}</Span>
+const Additions = ({ value }) => <Span color="#00c100">+{value}</Span>
 const Deletions = ({ value }) => <Span color="#f00">-{value}</Span>
 
 const timespan = value => {
