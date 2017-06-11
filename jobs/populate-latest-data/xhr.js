@@ -25,6 +25,15 @@ const getJson = url =>
           throw err
         }
 
+        if (err.response.statusCode == '401') {
+          throw new Error('Uh oh, looks like you forgot the access token!')
+        }
+
+        // 404s show up sometimes, due to some OS thing w/ DNS. Just retry.
+        if (err.response.statusCode == '404') {
+          setTimeout(() => resolve(getJson(url)), 1000)
+        }
+
         const retryAfter = +err.response.header['retry-after']
         const remaining = err.response.header['x-ratelimit-remaining']
         const reset = +err.response.header['x-ratelimit-reset']
@@ -37,6 +46,7 @@ const getJson = url =>
             setTimeout(() => resolve(getJson(url)), retryAfter * 1000)
           })
         }
+
         if (remaining) {
           return new Promise(resolve => {
             console.log(

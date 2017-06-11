@@ -38,10 +38,13 @@ function getActualPrsWithEvents(prNumbers) {
           path: `pulls/${number}`,
         }).then(({ body }) => body),
         getGhJson({
+          path: `issues/${number}`,
+        }).then(({ body }) => body),
+        getGhJson({
           path: `issues/${number}/timeline`,
           query: { per_page: '100' },
         }).then(({ body }) => body),
-      ]).then(([pr, events]) => ({ pr, events }))
+      ]).then(([pr, issue, events]) => ({ pr, issue, events }))
     )
   )
 }
@@ -55,7 +58,7 @@ const getDateCreated = event => (event ? new Date(event.created_at) : null)
 
 function createFinalPrObjs(prsAndEvents) {
   return prsAndEvents.map(thing => {
-    const { pr, events = [] } = thing
+    const { pr, issue, events = [] } = thing
     const gtgEvent = getLastGtgEvent(events)
     const dateGtG = getDateCreated(gtgEvent)
     const dateMerged = pr.merged_at ? new Date(pr.merged_at) : null
@@ -110,6 +113,7 @@ function createFinalPrObjs(prsAndEvents) {
       gtgReviewer: gtgEvent && gtgEvent.actor.login,
       commenters,
       numRevisions: needsRevisionEvents.length,
+      labels: issue.labels,
       times: {
         waitingForReview,
         spentInReview,

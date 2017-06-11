@@ -16,8 +16,6 @@ MongoClient.connect(mongoConnectionStr)
     console.log('Connected successfully to db')
 
     return Promise.resolve()
-      .then(() => db.collection('pullRequests').deleteMany({}))
-      .then(() => console.log('Deleted all previous PRs'))
       .then(() => populatePrs({ db }))
       .then(() => console.log('All PRs added'))
       .then(
@@ -43,10 +41,18 @@ const initialUrl = getGhUrl({
 function populatePrs({ db, url = initialUrl }) {
   return getProcessedPrs({ url })
     .then(({ next, prs }) => {
-      return db.collection('pullRequests').insertMany(prs).then(results => {
-        console.log(`Inserted ${results.result.n} docs`)
-        return next
-      })
+      return Promise.resolve()
+        .then(() =>
+          db
+            .collection('pullRequests')
+            .deleteMany({ number: { $in: prs.map(pr => pr.number) } })
+        )
+        .then(({ deletedCount }) => console.log(`Deleted ${deletedCount} PRS`))
+        .then(() => db.collection('pullRequests').insertMany(prs))
+        .then(results => {
+          console.log(`Inserted ${results.result.n} docs`)
+          return next
+        })
     })
     .then(delay(2000))
     .then(next => (next ? populatePrs({ db, url: next.url }) : null))
