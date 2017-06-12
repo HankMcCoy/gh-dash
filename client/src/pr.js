@@ -11,6 +11,12 @@ const Link = glamorous.a({
   textDecoration: 'none',
 })
 const timeAgo = val => timespan(new Date() - new Date(val))
+const isBright = x =>
+  [
+    parseInt(x.slice(0, 2), 16),
+    parseInt(x.slice(2, 4), 16),
+    parseInt(x.slice(4, 6), 16),
+  ].reduce((acc, x) => acc + x, 0) > 381
 
 const Pr = ({ pr }) => {
   const additionalCommenters = pr.commenters.filter(
@@ -26,6 +32,22 @@ const Pr = ({ pr }) => {
         >
           {pr.title}
         </Link>
+        {' '}
+        {pr.labels.map(l => (
+          <Div
+            borderRadius="3px"
+            fontSize="12px"
+            position="relative"
+            top="-1px"
+            marginRight="10px"
+            padding="2px 5px"
+            display="inline-block"
+            background={`#${l.color}`}
+            color={isBright(l.color) ? '#444' : '#fff'}
+          >
+            {l.name}
+          </Div>
+        ))}
       </Div>
       <Spacer height="5px" />
       <Div>
