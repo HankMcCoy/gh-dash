@@ -20,7 +20,12 @@ const Pr = ({ pr }) => {
   return (
     <Div display="flex" flexDirection="column">
       <Div>
-        <Link href={`/pull-requests/${pr.number}`}>{pr.title}</Link>
+        <Link
+          href={`https://github.com/buildingconnected/client/pull/${pr.number}`}
+          target="_blank"
+        >
+          {pr.title}
+        </Link>
       </Div>
       <Spacer height="5px" />
       <Div>
