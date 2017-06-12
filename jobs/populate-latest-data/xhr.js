@@ -21,17 +21,19 @@ const getJson = url =>
         body: res.body,
       }),
       err => {
+        // 404s show up sometimes, due to some OS thing w/ DNS. Just retry.
+        if (err.code == 'ENOTFOUND') {
+          return new Promise(resolve => {
+            setTimeout(() => resolve(getJson(url)), 1000)
+          })
+        }
+
         if (!err.response) {
           throw err
         }
 
         if (err.response.statusCode == '401') {
           throw new Error('Uh oh, looks like you forgot the access token!')
-        }
-
-        // 404s show up sometimes, due to some OS thing w/ DNS. Just retry.
-        if (err.response.statusCode == '404') {
-          setTimeout(() => resolve(getJson(url)), 1000)
         }
 
         const retryAfter = +err.response.header['retry-after']
