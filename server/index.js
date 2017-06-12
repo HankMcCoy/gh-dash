@@ -21,14 +21,14 @@ app.get('/api/pull-requests', (req, res) => {
 
 app.get('/api/review-times', (req, res) => {
   const weekInMs = 1000 * 60 * 60 * 24 * 7
-  const fiveWeeksAgo = new Date(Date.now() - 5 * weekInMs)
+  const startDate = new Date(Date.now() - 10 * weekInMs)
 
   db
     .collection('pullRequests')
     .aggregate([
       {
         $match: {
-          dateMerged: { $gt: fiveWeeksAgo },
+          dateMerged: { $gt: startDate },
         },
       },
       {

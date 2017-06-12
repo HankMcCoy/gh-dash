@@ -23,7 +23,6 @@ class ReviewTimes extends Component {
           {timeWaitingForReviewByWeek
             ? <VictoryChart domainPadding={20}>
                 <VictoryAxis
-                  tickValues={timeWaitingForReviewByWeek.map(t => t._id)}
                   tickFormat={timeWaitingForReviewByWeek.map(
                     t => `Week ${t._id}`
                   )}
