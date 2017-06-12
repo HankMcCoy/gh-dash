@@ -1,3 +1,4 @@
+import _ from 'lodash'
 import React, { Component } from 'react'
 import { Div, Select } from 'glamorous'
 
@@ -17,6 +18,16 @@ class RevisionsByAuthor extends Component {
   render() {
     const { author, authors, revisionsByAuthor } = this.state
     const revisionsByCurrentAuthor = revisionsByAuthor[author] || []
+
+    const totalPrsAuthored = _.values(revisionsByCurrentAuthor).reduce(
+      (total, { count }) => total + count,
+      0
+    )
+    const totalRevisions = _.values(revisionsByCurrentAuthor).reduce(
+      (total, { numRevisions }) => total + numRevisions,
+      0
+    )
+    const overallAvgRevisions = totalRevisions / totalPrsAuthored
 
     return (
       <div>
@@ -39,6 +50,8 @@ class RevisionsByAuthor extends Component {
             </Select>
           </Div>
         </SectionHeader>
+        <Spacer height="10px" />
+        <Div>Overall avg revisions: {overallAvgRevisions.toFixed(2)}</Div>
         <Spacer height="10px" />
         <Table
           data={revisionsByCurrentAuthor}

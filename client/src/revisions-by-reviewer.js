@@ -18,6 +18,15 @@ class RevisionsByReviewer extends Component {
     const { reviewer, reviewers, revisionsByReviewer } = this.state
     const revisionsByCurrentReviewer = revisionsByReviewer[reviewer] || []
 
+    const totalPrsReviewed = _.values(revisionsByCurrentReviewer).reduce(
+      (total, { count }) => total + count,
+      0
+    )
+    const totalRevisions = _.values(revisionsByCurrentReviewer).reduce(
+      (total, { numRevisions }) => total + numRevisions,
+      0
+    )
+    const overallAvgRevisions = totalRevisions / totalPrsReviewed
     return (
       <div>
         <SectionHeader>
@@ -39,6 +48,8 @@ class RevisionsByReviewer extends Component {
             </Select>
           </Div>
         </SectionHeader>
+        <Spacer height="10px" />
+        <div>Overall avg revisions: {overallAvgRevisions.toFixed(2)}</div>
         <Spacer height="10px" />
         <Table
           data={revisionsByCurrentReviewer}
