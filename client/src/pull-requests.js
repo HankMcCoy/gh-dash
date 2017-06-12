@@ -9,7 +9,7 @@ const addMargins = intersperse(i => <Spacer height="12px" key={i} />)
 
 const PullRequests = ({ pullRequests }) => (
   <div>
-    <SectionHeader>Pull Requests</SectionHeader>
+    <SectionHeader>Open pull requests</SectionHeader>
     <Spacer height="10px" />
     {addMargins(pullRequests.map(pr => <Pr pr={pr} key={pr._id} />))}
   </div>

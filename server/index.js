@@ -14,9 +14,12 @@ app.get('/', (req, res) => {
 app.use('/js', express.static(path.join(__dirname, '../client/js')))
 
 app.get('/api/pull-requests', (req, res) => {
-  db.collection('pullRequests').find().limit(10).toArray((err, prs) => {
-    res.send({ pullRequests: prs })
-  })
+  db
+    .collection('pullRequests')
+    .find({ dateClosed: null })
+    .toArray((err, prs) => {
+      res.send({ pullRequests: prs })
+    })
 })
 
 app.get('/api/review-times', (req, res) => {
