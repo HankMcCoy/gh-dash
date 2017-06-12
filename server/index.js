@@ -34,8 +34,14 @@ app.get('/api/review-times', (req, res) => {
       {
         $group: {
           _id: { $week: '$dateMerged' },
-          avgTimeWaitingForReview: {
+          spentInReview: {
+            $avg: '$times.spentInReview',
+          },
+          waitingForReview: {
             $avg: '$times.waitingForReview',
+          },
+          afterReviewBeforeMerge: {
+            $avg: '$times.afterReviewBeforeMerge',
           },
         },
       },
@@ -44,7 +50,7 @@ app.get('/api/review-times', (req, res) => {
       if (err) {
         res.send(err)
       } else {
-        res.send({ reviewTimes: { waitingForReview: results } })
+        res.send({ reviewTimes: results })
       }
     })
 })
