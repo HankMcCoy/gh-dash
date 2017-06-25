@@ -46,6 +46,7 @@ app.get('/api/pull-requests', (req, res) => {
 app.get('/api/review-times', (req, res) => {
   const weekInMs = 1000 * 60 * 60 * 24 * 7
   const startDate = new Date(Date.now() - 10 * weekInMs)
+  const { org, repo } = req.query
 
   db
     .collection('pullRequests')
@@ -53,6 +54,8 @@ app.get('/api/review-times', (req, res) => {
       {
         $match: {
           dateMerged: { $gt: startDate },
+          repo,
+          org,
         },
       },
       {
