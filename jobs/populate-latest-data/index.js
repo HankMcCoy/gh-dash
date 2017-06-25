@@ -2,10 +2,20 @@
 'use strict'
 const MongoClient = require('mongodb').MongoClient
 const _ = require('lodash')
+const program = require('commander')
 
 const delay = require('./delay')
 const getProcessedPrs = require('./get-processed-prs')
-const { getGhUrl, getGhJson } = require('./xhr')
+
+program
+  .option('-o, --org <value>', 'The GH organization to query')
+  .option('-r, --repo <value>', 'The GH repo to query')
+  .parse(process.argv)
+
+const { getGhUrl, getGhJson } = require('./xhr').create({
+  org: program.org,
+  repo: program.repo,
+})
 
 // Connection URL
 const mongoConnectionStr = 'mongodb://localhost:27017/gh-dash'
@@ -39,7 +49,11 @@ const initialUrl = getGhUrl({
   },
 })
 function populatePrs({ db, url = initialUrl }) {
-  return getProcessedPrs({ url })
+  return getProcessedPrs({
+    url,
+    org: program.org,
+    repo: program.repo,
+  })
     .then(({ next, prs }) => {
       return Promise.resolve()
         .then(() =>

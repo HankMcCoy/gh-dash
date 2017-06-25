@@ -7,21 +7,27 @@ const sortBy = require('lodash/fp/sortBy')
 const first = require('lodash/fp/first')
 const parseLinkHeader = require('parse-link-header')
 
-const { getJson, getGhJson } = require('./xhr')
+let xhr
 
-function getProcessedPrs({ url }) {
+function getProcessedPrs({ url, org, repo }) {
+  xhr = require('./xhr').create({ org, repo })
+
   let next
   return getPrNumbers({ url })
     .then(({ next: nextArg, numbers }) => {
       next = nextArg
       return getActualPrsWithEvents(numbers)
     })
-    .then(createFinalPrObjs)
+    .then(prsAndEvents => createFinalPrObjs({
+      org,
+      prsAndEvents,
+      repo,
+    }))
     .then(prs => ({ next, prs }))
 }
 
 function getPrNumbers({ url }) {
-  return getJson(url).then(({ headers, body: prs }) => {
+  return xhr.getJson(url).then(({ headers, body: prs }) => {
     const next = parseLinkHeader(headers.link).next
     return {
       next,
@@ -34,13 +40,13 @@ function getActualPrsWithEvents(prNumbers) {
   return Promise.all(
     prNumbers.map(number =>
       Promise.all([
-        getGhJson({
+        xhr.getGhJson({
           path: `pulls/${number}`,
         }).then(({ body }) => body),
-        getGhJson({
+        xhr.getGhJson({
           path: `issues/${number}`,
         }).then(({ body }) => body),
-        getGhJson({
+        xhr.getGhJson({
           path: `issues/${number}/timeline`,
           query: { per_page: '100' },
         }).then(({ body }) => body),
@@ -56,7 +62,7 @@ const getLastGtgEvent = events =>
 
 const getDateCreated = event => (event ? new Date(event.created_at) : null)
 
-function createFinalPrObjs(prsAndEvents) {
+function createFinalPrObjs({ org, prsAndEvents, repo }) {
   return prsAndEvents.map(thing => {
     const { pr, issue, events = [] } = thing
     const gtgEvent = getLastGtgEvent(events)
@@ -101,6 +107,8 @@ function createFinalPrObjs(prsAndEvents) {
 
     return {
       id: pr.id,
+      org,
+      repo,
       number: pr.number,
       title: pr.title,
       body: pr.body,
