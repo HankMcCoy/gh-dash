@@ -82,11 +82,12 @@ class RevisionsByReviewer extends Component {
   }
 
   handleReviewerChange = event => {
+    const { org, repo } = this.props
     const reviewer = event.target.value
     this.setState({ reviewer })
 
     window
-      .fetch(`/api/revisions-by-reviewer/${reviewer}`)
+      .fetch(`/api/revisions-by-reviewer/${reviewer}?org=${org}&repo=${repo}`)
       .then(res => res.json())
       .then(({ revisionCounts }) => {
         this.setState(prevState => ({

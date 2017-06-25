@@ -3,7 +3,7 @@ import { Div } from 'glamorous'
 
 import Heading from './heading'
 
-const SiteHeader = ({ orgs, repos }) => (
+const SiteHeader = ({ org, repo, orgs, repos, setOrg, setRepo }) => (
   <Div
     background="#336480"
     color="#fff"
@@ -14,10 +14,16 @@ const SiteHeader = ({ orgs, repos }) => (
   >
     {orgs && repos
       ? <div>
-          <select name="org">
+          <select name="org" onChange={e => setOrg(e.target.value)} value={org}>
+            <option />
             {orgs.map(org => <option value={org} key={org}>{org}</option>)}
           </select>
-          <select name="repo">
+          <select
+            name="repo"
+            onChange={e => setRepo(e.target.value)}
+            value={repo}
+          >
+            <option />
             {repos.map(repo => <option value={repo} key={repo}>{repo}</option>)}
           </select>
         </div>
@@ -34,7 +40,7 @@ class SiteHeaderContainer extends Component {
     this.state = { orgs: [], repos: [] }
   }
 
-  render = () => <SiteHeader {...this.state} />
+  render = () => <SiteHeader {...this.state} {...this.props} />
 
   componentDidMount() {
     Promise.all([

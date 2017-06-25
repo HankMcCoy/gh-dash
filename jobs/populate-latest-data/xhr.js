@@ -4,11 +4,8 @@ const parseLinkHeader = require('parse-link-header')
 const request = require('superagent-promise')(require('superagent'), Promise)
 const querystring = require('querystring')
 
-const org = 'buildingconnected'
-const repo = 'client'
 const token = process.env.GH_TOKEN
 const api = 'https://api.github.com'
-const repoUrl = `${api}/repos/${org}/${repo}`
 
 const retryInRoughly = (seconds, fn) => {
   const randomExtraTime = Math.round(Math.random() * 2000) + 500
@@ -16,6 +13,7 @@ const retryInRoughly = (seconds, fn) => {
 }
 
 exports.create = ({ org, repo }) => {
+  const repoUrl = `${api}/repos/${org}/${repo}`
   const getJson = url =>
     request
       .get(url)
@@ -29,6 +27,7 @@ exports.create = ({ org, repo }) => {
         err => {
           // 404s show up sometimes, due to some OS thing w/ DNS. Just retry.
           if (err.code == 'ENOTFOUND') {
+            console.log('Hit file limit thingy, waiting a second…')
             return new Promise(resolve => {
               retryInRoughly(1, () => resolve(getJson(url)))
             })
@@ -57,9 +56,7 @@ exports.create = ({ org, repo }) => {
 
           if (remaining) {
             return new Promise(resolve => {
-              console.log(
-                `Rate limit hit, waiting ${secDiff} seconds`
-              )
+              console.log(`Rate limit hit, waiting ${secDiff} seconds`)
               retryInRoughly(secDiff, () => resolve(getJson(url)))
             })
           }

@@ -7,7 +7,7 @@ const mongoConnectionStr = 'mongodb://localhost:27017/gh-dash'
 
 let db
 
-const getSortedDistinct = (attr) => {
+const getSortedDistinct = attr => {
   return db
     .collection('pullRequests')
     .distinct(attr)
@@ -29,9 +29,15 @@ app.get('/api/repos', (req, res) => {
 })
 
 app.get('/api/pull-requests', (req, res) => {
+  const { org, repo } = req.query
+
   db
     .collection('pullRequests')
-    .find({ dateClosed: null })
+    .find({
+      dateClosed: null,
+      org,
+      repo,
+    })
     .toArray((err, prs) => {
       res.send({ pullRequests: prs })
     })

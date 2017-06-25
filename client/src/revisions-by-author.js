@@ -81,11 +81,12 @@ class RevisionsByAuthor extends Component {
   }
 
   handleAuthorChange = event => {
+    const { org, repo } = this.props
     const author = event.target.value
     this.setState({ author })
 
     window
-      .fetch(`/api/revisions-by-author/${author}`)
+      .fetch(`/api/revisions-by-author/${author}?org=${org}&repo=${repo}`)
       .then(res => res.json())
       .then(({ revisionCounts }) => {
         this.setState(prevState => ({

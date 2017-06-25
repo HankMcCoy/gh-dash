@@ -77,8 +77,9 @@ class ReviewTimes extends Component {
   }
 
   componentDidMount() {
+    const { org, repo } = this.props
     window
-      .fetch('/api/review-times')
+      .fetch(`/api/review-times?org=${org}&repo=${repo}`)
       .then(res => res.json())
       .then(({ reviewTimes }) => {
         this.setState({ reviewTimes })
