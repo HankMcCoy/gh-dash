@@ -7,11 +7,26 @@ const mongoConnectionStr = 'mongodb://localhost:27017/gh-dash'
 
 let db
 
+const getSortedDistinct = (attr) => {
+  return db
+    .collection('pullRequests')
+    .distinct(attr)
+    .then(values => values.filter(x => x).sort(caseInsensitiveCompare))
+}
+
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '../client/index.html'))
 })
 
 app.use('/js', express.static(path.join(__dirname, '../client/js')))
+
+app.get('/api/orgs', (req, res) => {
+  getSortedDistinct('org').then(orgs => res.send({ orgs }))
+})
+
+app.get('/api/repos', (req, res) => {
+  getSortedDistinct('repo').then(repos => res.send({ repos }))
+})
 
 app.get('/api/pull-requests', (req, res) => {
   db
@@ -126,17 +141,11 @@ const caseInsensitiveCompare = (a, b) => {
 }
 
 app.get('/api/reviewers', (req, res) => {
-  db.collection('pullRequests').distinct('gtgReviewer').then(reviewers => {
-    res.send({
-      reviewers: reviewers.filter(x => x).sort(caseInsensitiveCompare),
-    })
-  })
+  getSortedDistinct('gtgReviewer').then(reviewers => res.send({ reviewers }))
 })
 
 app.get('/api/authors', (req, res) => {
-  db.collection('pullRequests').distinct('author').then(authors => {
-    res.send({ authors: authors.filter(x => x).sort(caseInsensitiveCompare) })
-  })
+  getSortedDistinct('author').then(authors => res.send({ authors }))
 })
 
 MongoClient.connect(mongoConnectionStr).then(

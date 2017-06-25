@@ -46,7 +46,7 @@ class RevisionsByAuthor extends Component {
               fontSize="18px"
             >
               <option />
-              {authors.map(r => <option value={r}>{r}</option>)}
+              {authors.map(r => <option value={r} key={r}>{r}</option>)}
             </Select>
           </Div>
         </SectionHeader>

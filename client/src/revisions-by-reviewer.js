@@ -44,7 +44,7 @@ class RevisionsByReviewer extends Component {
               fontSize="18px"
             >
               <option />
-              {reviewers.map(r => <option value={r}>{r}</option>)}
+              {reviewers.map(r => <option value={r} key={r}>{r}</option>)}
             </Select>
           </Div>
         </SectionHeader>

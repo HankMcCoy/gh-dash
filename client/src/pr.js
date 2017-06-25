@@ -44,6 +44,7 @@ const Pr = ({ pr }) => {
             display="inline-block"
             background={`#${l.color}`}
             color={isBright(l.color) ? '#444' : '#fff'}
+            key={l.name}
           >
             {l.name}
           </Div>

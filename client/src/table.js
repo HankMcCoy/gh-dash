@@ -18,13 +18,15 @@ const Table = ({ columns, data }) => (
   <Wrapper>
     <Head>
       {columns.map(col => (
-        <HeadCell css={{ flex: col.flex || '1 0 0%' }}>{col.header}</HeadCell>
+        <HeadCell css={{ flex: col.flex || '1 0 0%' }} key={col.header}>
+          {col.header}
+        </HeadCell>
       ))}
     </Head>
-    {data.map(rowData => (
-      <Row>
+    {data.map((rowData, rowIdx) => (
+      <Row key={rowIdx}>
         {columns.map(col => (
-          <RowCell css={{ flex: col.flex || '1 0 0%' }}>
+          <RowCell css={{ flex: col.flex || '1 0 0%' }} key={col.header}>
             {col.renderCell(rowData)}
           </RowCell>
         ))}
