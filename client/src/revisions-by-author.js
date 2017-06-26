@@ -1,102 +1,57 @@
 import _ from 'lodash'
 import React, { Component } from 'react'
 import { Div, Select } from 'glamorous'
+import { withState } from 'recompose'
 
+import Fetch from './util/fetch'
 import PullRequests from './pull-requests'
 import SectionHeader from './section-header'
 import Heading from './heading'
 import Spacer from './spacer'
-import Table from './table'
+import RevisionsTable from './revisions-table'
 
-class RevisionsByAuthor extends Component {
-  state = {
-    author: undefined,
-    authors: [],
-    revisionsByAuthor: {},
-  }
-
-  render() {
-    const { author, authors, revisionsByAuthor } = this.state
-    const revisionsByCurrentAuthor = revisionsByAuthor[author] || []
-
-    const totalPrsAuthored = _.values(revisionsByCurrentAuthor).reduce(
-      (total, { count }) => total + count,
-      0
-    )
-    const totalRevisions = _.values(revisionsByCurrentAuthor).reduce(
-      (total, { numRevisions }) => total + numRevisions,
-      0
-    )
-    const overallAvgRevisions = totalRevisions / totalPrsAuthored
-
-    return (
-      <div>
-        <SectionHeader>
-          <Div
-            alignItems="center"
-            display="flex"
-            justifyContent="space-between"
-            width="100%"
-          >
-            <Heading type="primary">Revisions by author:</Heading>
-            <Select
-              value={author}
-              onChange={this.handleAuthorChange}
-              height="30px"
-              fontSize="18px"
+const RevisionsByAuthor = ({ author, authors, setAuthor, org, repo }) => {
+  return (
+    <Fetch url="/api/authors">
+      {({ authors = [] } = {}) => (
+        <div>
+          <SectionHeader>
+            <Div
+              alignItems="center"
+              display="flex"
+              justifyContent="space-between"
+              width="100%"
             >
-              <option />
-              {authors.map(r => <option value={r} key={r}>{r}</option>)}
-            </Select>
-          </Div>
-        </SectionHeader>
-        <Spacer height="10px" />
-        <Div>Overall avg revisions: {overallAvgRevisions.toFixed(2)}</Div>
-        <Spacer height="10px" />
-        <Table
-          data={revisionsByCurrentAuthor}
-          columns={[
-            {
-              header: 'Reviewer',
-              renderCell: ({ _id }) => _id,
-              flex: '0 1 150px',
-            },
-            { header: '#', renderCell: ({ count }) => count, flex: '0 0 45px' },
-            {
-              header: 'Avg Revisions',
-              renderCell: ({ count, numRevisions }) =>
-                (numRevisions / count).toFixed(2),
-              flex: '1 0 50px',
-            },
-          ]}
-        />
-      </div>
-    )
-  }
-
-  componentDidMount() {
-    window.fetch('/api/authors').then(res => res.json()).then(({ authors }) => {
-      this.setState({ authors })
-    })
-  }
-
-  handleAuthorChange = event => {
-    const { org, repo } = this.props
-    const author = event.target.value
-    this.setState({ author })
-
-    window
-      .fetch(`/api/revisions-by-author/${author}?org=${org}&repo=${repo}`)
-      .then(res => res.json())
-      .then(({ revisionCounts }) => {
-        this.setState(prevState => ({
-          revisionsByAuthor: {
-            ...prevState.revisionsByAuthor,
-            [author]: revisionCounts,
-          },
-        }))
-      })
-  }
+              <Heading type="primary">Revisions by author:</Heading>
+              <Select
+                value={author}
+                onChange={e => setAuthor(e.target.value)}
+                height="30px"
+                fontSize="18px"
+              >
+                <option />
+                {authors.map(r => <option value={r} key={r}>{r}</option>)}
+              </Select>
+            </Div>
+          </SectionHeader>
+          {author
+            ? <Fetch
+                url={`/api/revisions-by-author/${author}?org=${org}&repo=${repo}`}
+              >
+                {({ revisionCounts } = {}) => {
+                  return (
+                    <RevisionsTable
+                      revisionCounts={revisionCounts}
+                      type="Author"
+                    />
+                  )
+                }}
+              </Fetch>
+            : null}
+        </div>
+      )}
+    </Fetch>
+  )
 }
 
-export default RevisionsByAuthor
+export default withState('author', 'setAuthor', '')(RevisionsByAuthor)

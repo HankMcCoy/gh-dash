@@ -57,9 +57,13 @@ function populatePrs({ db, url = initialUrl }) {
     .then(({ next, prs }) => {
       return Promise.resolve()
         .then(() =>
-          db
-            .collection('pullRequests')
-            .deleteMany({ number: { $in: prs.map(pr => pr.number) } })
+          db.collection('pullRequests').deleteMany({
+            org: program.org,
+            repo: program.repo,
+            number: {
+              $in: prs.map(pr => pr.number),
+            },
+          })
         )
         .then(({ deletedCount }) => console.log(`Deleted ${deletedCount} PRS`))
         .then(() => db.collection('pullRequests').insertMany(prs))

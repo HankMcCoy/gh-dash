@@ -84,6 +84,7 @@ app.get('/api/review-times', (req, res) => {
 
 app.get('/api/revisions-by-author/:author', (req, res) => {
   const { author } = req.params
+  const { org, repo } = req.query
 
   db
     .collection('pullRequests')
@@ -92,6 +93,8 @@ app.get('/api/revisions-by-author/:author', (req, res) => {
         $match: {
           author,
           gtgReviewer: { $ne: null },
+          org,
+          repo,
         },
       },
       {
