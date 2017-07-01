@@ -1,4 +1,5 @@
 const express = require('express')
+const _ = require('lodash')
 const path = require('path')
 const app = express()
 const MongoClient = require('mongodb').MongoClient
@@ -42,6 +43,77 @@ app.get('/api/pull-requests', (req, res) => {
       res.send({ pullRequests: prs })
     })
 })
+
+app.get('/api/author-leader-board', (req, res) => {
+  const weekInMs = 1000 * 60 * 60 * 24 * 7
+  const startDate = new Date(Date.now() - 10 * weekInMs)
+  const { org, repo } = req.query
+
+  getLeaderBoard({ type: 'author', org, repo, startDate }).then(results =>
+    res.send({ results })
+  )
+})
+
+app.get('/api/reviewer-leader-board', (req, res) => {
+  const weekInMs = 1000 * 60 * 60 * 24 * 7
+  const startDate = new Date(Date.now() - 10 * weekInMs)
+  const { org, repo } = req.query
+
+  getLeaderBoard({ type: 'gtgReviewer', org, repo, startDate }).then(results =>
+    res.send({ results })
+  )
+})
+
+const getLeaderBoard = ({ type, org, repo, startDate }) => {
+  return new Promise((resolve, reject) => {
+    db
+      .collection('pullRequests')
+      .aggregate([
+        {
+          $match: {
+            dateMerged: { $gt: startDate },
+            repo,
+            org,
+          },
+        },
+        {
+          $addFields: {
+            loc: { $add: ['$additions', '$deletions'] },
+          },
+        },
+        {
+          $group: {
+            _id: '$' + type,
+            count: { $sum: 1 },
+            totalLoc: { $sum: '$loc' },
+            totalRevisions: { $sum: '$numRevisions' },
+            locs: { $push: '$loc' },
+          },
+        },
+      ])
+      .toArray((err, results) => {
+        console.log({ results })
+        if (err) {
+          return reject(err)
+        }
+        const processedResults = results.map(r => {
+          const locs = _.sortBy(r.locs)
+          return {
+            [type]: r._id,
+            count: r.count,
+            avgLoc: r.totalLoc / r.count,
+            minLoc: locs[0],
+            medianLoc: locs[Math.floor(locs.length / 2)],
+            maxLoc: locs[locs.length - 1],
+            totalLoc: r.totalLoc,
+            avgRevisions: r.totalRevisions / r.count,
+          }
+        })
+
+        resolve(processedResults)
+      })
+  })
+}
 
 app.get('/api/review-times', (req, res) => {
   const weekInMs = 1000 * 60 * 60 * 24 * 7
