@@ -10,12 +10,12 @@ import RevisionsByReviewer from './revisions-by-reviewer'
 import RevisionsByAuthor from './revisions-by-author'
 import LeaderBoard from './leader-board'
 
-const App = ({ org, repo, setOrg, setRepo }) => {
-  const readOnlyProps = { org, repo }
+const App = ({ org, repo, startDate, setOrg, setRepo, setStartDate }) => {
+  const readOnlyProps = { org, repo, startDate }
 
   return (
     <div>
-      <SiteHeader {...{ org, repo, setOrg, setRepo }} />
+      <SiteHeader {...readOnlyProps} {...{ setOrg, setRepo, setStartDate }} />
       <SiteContent>
         {org &&
           repo &&
@@ -50,14 +50,20 @@ body {
 }
 
 class AppContainer extends Component {
-  state = { org: '', repo: '' }
+  state = { org: '', repo: '', startDate: '' }
 
   render = () => (
-    <App {...this.state} setOrg={this.setOrg} setRepo={this.setRepo} />
+    <App
+      {...this.state}
+      setOrg={this.setOrg}
+      setRepo={this.setRepo}
+      setStartDate={this.setStartDate}
+    />
   )
 
   setOrg = org => this.setState({ org })
   setRepo = repo => this.setState({ repo })
+  setStartDate = startDate => this.setState({ startDate })
 }
 
 export default AppContainer

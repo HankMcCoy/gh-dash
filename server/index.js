@@ -45,9 +45,7 @@ app.get('/api/pull-requests', (req, res) => {
 })
 
 app.get('/api/author-leader-board', (req, res) => {
-  const weekInMs = 1000 * 60 * 60 * 24 * 7
-  const startDate = new Date(Date.now() - 10 * weekInMs)
-  const { org, repo } = req.query
+  const { org, repo, startDate } = req.query
 
   getLeaderBoard({ type: 'author', org, repo, startDate }).then(results =>
     res.send({ results })
@@ -55,9 +53,7 @@ app.get('/api/author-leader-board', (req, res) => {
 })
 
 app.get('/api/reviewer-leader-board', (req, res) => {
-  const weekInMs = 1000 * 60 * 60 * 24 * 7
-  const startDate = new Date(Date.now() - 10 * weekInMs)
-  const { org, repo } = req.query
+  const { org, repo, startDate } = req.query
 
   getLeaderBoard({ type: 'gtgReviewer', org, repo, startDate }).then(results =>
     res.send({ results })
@@ -71,7 +67,7 @@ const getLeaderBoard = ({ type, org, repo, startDate }) => {
       .aggregate([
         {
           $match: {
-            dateMerged: { $gt: startDate },
+            dateMerged: { $gt: new Date(startDate) },
             repo,
             org,
           },
@@ -116,16 +112,14 @@ const getLeaderBoard = ({ type, org, repo, startDate }) => {
 }
 
 app.get('/api/review-times', (req, res) => {
-  const weekInMs = 1000 * 60 * 60 * 24 * 7
-  const startDate = new Date(Date.now() - 10 * weekInMs)
-  const { org, repo } = req.query
+  const { org, repo, startDate } = req.query
 
   db
     .collection('pullRequests')
     .aggregate([
       {
         $match: {
-          dateMerged: { $gt: startDate },
+          dateMerged: { $gt: new Date(startDate) },
           repo,
           org,
         },

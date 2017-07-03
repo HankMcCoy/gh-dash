@@ -8,8 +8,10 @@ import intersperse from './util/intersperse'
 import Fetch from './util/fetch'
 import Table from './table'
 
-const LeaderBoard = ({ type, org, repo }) => (
-  <Fetch url={`/api/${type}-leader-board?org=${org}&repo=${repo}`}>
+const LeaderBoard = ({ type, org, repo, startDate }) => (
+  <Fetch
+    url={`/api/${type}-leader-board?org=${org}&repo=${repo}&startDate=${startDate}`}
+  >
     {({ results = [] } = {}) => (
       <div>
         <SectionHeader>{`${_.capitalize(type)} Leader Board`}</SectionHeader>

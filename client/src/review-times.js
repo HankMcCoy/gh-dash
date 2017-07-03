@@ -22,9 +22,11 @@ const ColorLegend = ({ color, label, isLast }) => (
   </Div>
 )
 
-const ReviewTimes = ({ org, repo }) => {
+const ReviewTimes = ({ org, repo, startDate }) => {
   return (
-    <Fetch url={`/api/review-times?org=${org}&repo=${repo}`}>
+    <Fetch
+      url={`/api/review-times?org=${org}&repo=${repo}&startDate=${startDate}`}
+    >
       {({ reviewTimes } = {}) => {
         return (
           <div>

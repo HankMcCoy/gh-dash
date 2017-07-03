@@ -3,7 +3,21 @@ import { Div } from 'glamorous'
 
 import Heading from './heading'
 
-const SiteHeader = ({ org, repo, orgs, repos, setOrg, setRepo }) => (
+const aWeekInMs = 1000 * 60 * 60 * 24 * 7
+const now = new Date()
+const getDateWeeksAgo = numWeeks => {
+  return new Date(now - aWeekInMs * numWeeks).toISOString()
+}
+const SiteHeader = ({
+  org,
+  repo,
+  orgs,
+  repos,
+  startDate,
+  setOrg,
+  setRepo,
+  setStartDate,
+}) => (
   <Div
     background="#336480"
     color="#fff"
@@ -28,6 +42,18 @@ const SiteHeader = ({ org, repo, orgs, repos, setOrg, setRepo }) => (
           </select>
         </div>
       : 'Loading…'}
+    <select
+      name="startDate"
+      onChange={e => setStartDate(e.target.value)}
+      value={startDate}
+    >
+      <option />
+      <option value={getDateWeeksAgo(1)}>1 week</option>
+      <option value={getDateWeeksAgo(2)}>2 weeks</option>
+      <option value={getDateWeeksAgo(4)}>4 weeks</option>
+      <option value={getDateWeeksAgo(8)}>8 weeks</option>
+      <option value={getDateWeeksAgo(16)}>16 weeks</option>
+    </select>
   </Div>
 )
 
