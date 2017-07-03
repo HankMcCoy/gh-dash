@@ -150,7 +150,7 @@ app.get('/api/review-times', (req, res) => {
 
 app.get('/api/revisions-by-author/:author', (req, res) => {
   const { author } = req.params
-  const { org, repo } = req.query
+  const { org, repo, startDate } = req.query
 
   db
     .collection('pullRequests')
@@ -159,6 +159,7 @@ app.get('/api/revisions-by-author/:author', (req, res) => {
         $match: {
           author,
           gtgReviewer: { $ne: null },
+          dateMerged: { $gt: new Date(startDate) },
           org,
           repo,
         },
@@ -182,6 +183,7 @@ app.get('/api/revisions-by-author/:author', (req, res) => {
 
 app.get('/api/revisions-by-reviewer/:reviewer', (req, res) => {
   const { reviewer } = req.params
+  const { org, repo, startDate } = req.query
 
   db
     .collection('pullRequests')
@@ -189,6 +191,9 @@ app.get('/api/revisions-by-reviewer/:reviewer', (req, res) => {
       {
         $match: {
           gtgReviewer: reviewer,
+          dateMerged: { $gt: new Date(startDate) },
+          org,
+          repo,
         },
       },
       {

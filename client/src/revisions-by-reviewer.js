@@ -10,7 +10,14 @@ import Heading from './heading'
 import Spacer from './spacer'
 import RevisionsTable from './revisions-table'
 
-const RevisionsByReviewer = ({ reviewer, reviewers, setReviewer, org, repo }) => {
+const RevisionsByReviewer = ({
+  reviewer,
+  reviewers,
+  setReviewer,
+  org,
+  repo,
+  startDate,
+}) => {
   return (
     <Fetch url="/api/reviewers">
       {({ reviewers = [] } = {}) => (
@@ -36,7 +43,7 @@ const RevisionsByReviewer = ({ reviewer, reviewers, setReviewer, org, repo }) =>
           </SectionHeader>
           {reviewer
             ? <Fetch
-                url={`/api/revisions-by-reviewer/${reviewer}?org=${org}&repo=${repo}`}
+                url={`/api/revisions-by-reviewer/${reviewer}?org=${org}&repo=${repo}&startDate=${startDate}`}
               >
                 {({ revisionCounts } = {}) => {
                   return (
