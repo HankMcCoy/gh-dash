@@ -8,6 +8,7 @@ import PullRequests from './pull-requests'
 import ReviewTimes from './review-times'
 import RevisionsByReviewer from './revisions-by-reviewer'
 import RevisionsByAuthor from './revisions-by-author'
+import LeaderBoard from './leader-board'
 
 const App = ({ org, repo, setOrg, setRepo }) => {
   const readOnlyProps = { org, repo }
@@ -18,15 +19,19 @@ const App = ({ org, repo, setOrg, setRepo }) => {
       <SiteContent>
         {org &&
           repo &&
-          <Div display="flex">
-            <Div flex="1 0 0%">
-              <ReviewTimes {...readOnlyProps} />
-              <RevisionsByReviewer {...readOnlyProps} />
-              <RevisionsByAuthor {...readOnlyProps} />
-            </Div>
-            <Spacer width="20px" />
-            <Div flex="1 0 0%">
-              <PullRequests {...readOnlyProps} />
+          <Div>
+            <LeaderBoard type="author" {...readOnlyProps} />
+            <LeaderBoard type="reviewer" {...readOnlyProps} />
+            <Div display="flex">
+              <Div flex="1 0 0%">
+                <ReviewTimes {...readOnlyProps} />
+                <RevisionsByReviewer {...readOnlyProps} />
+                <RevisionsByAuthor {...readOnlyProps} />
+              </Div>
+              <Spacer width="20px" />
+              <Div flex="1 0 0%">
+                <PullRequests {...readOnlyProps} />
+              </Div>
             </Div>
           </Div>}
         {!org && <div>Please select an organization</div>}

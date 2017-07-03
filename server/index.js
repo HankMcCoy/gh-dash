@@ -99,7 +99,7 @@ const getLeaderBoard = ({ type, org, repo, startDate }) => {
         const processedResults = results.map(r => {
           const locs = _.sortBy(r.locs)
           return {
-            [type]: r._id,
+            [type]: r._id || 'Unknown',
             count: r.count,
             avgLoc: r.totalLoc / r.count,
             minLoc: locs[0],
