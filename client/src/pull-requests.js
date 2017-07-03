@@ -14,7 +14,11 @@ const PullRequests = ({ pullRequests, org, repo }) => (
       <div>
         <SectionHeader>Open pull requests</SectionHeader>
         <Spacer height="10px" />
-        {addMargins(pullRequests.map(pr => <Pr pr={pr} key={pr._id} />))}
+        {addMargins(
+          pullRequests.map(pr => (
+            <Pr org={org} repo={repo} pr={pr} key={pr._id} />
+          ))
+        )}
       </div>
     )}
   </Fetch>

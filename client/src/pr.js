@@ -18,7 +18,7 @@ const isBright = x =>
     parseInt(x.slice(4, 6), 16),
   ].reduce((acc, x) => acc + x, 0) > 381
 
-const Pr = ({ pr }) => {
+const Pr = ({ pr, org, repo }) => {
   const additionalCommenters = pr.commenters.filter(
     c => c !== pr.author && c !== pr.gtgReviewer
   )
@@ -27,7 +27,7 @@ const Pr = ({ pr }) => {
     <Div display="flex" flexDirection="column">
       <Div>
         <Link
-          href={`https://github.com/buildingconnected/client/pull/${pr.number}`}
+          href={`https://github.com/${org}/${repo}/pull/${pr.number}`}
           target="_blank"
         >
           {pr.title}
