@@ -40,7 +40,6 @@ exports.create = ({ org, repo }) => {
           if (err.response.statusCode == '401') {
             throw new Error('Uh oh, looks like you forgot the access token!')
           }
-
           const retryAfter = +err.response.header['retry-after']
           const remaining = err.response.header['x-ratelimit-remaining']
           const reset = +err.response.header['x-ratelimit-reset']
@@ -48,6 +47,8 @@ exports.create = ({ org, repo }) => {
           const secDiff = Math.ceil((resetDate - new Date()) / 1000)
 
           if (retryAfter) {
+console.log('URL', url)
+console.log('HEADERS', err.response.header)
             return new Promise(resolve => {
               console.log(`Hit abuse detection, waiting ${retryAfter} seconds`)
               retryInRoughly(retryAfter, () => resolve(getJson(url)))
@@ -55,6 +56,8 @@ exports.create = ({ org, repo }) => {
           }
 
           if (remaining) {
+console.log('URL', url)
+console.log('HEADERS', err.response.header)
             return new Promise(resolve => {
               console.log(`Rate limit hit, waiting ${secDiff} seconds`)
               retryInRoughly(secDiff, () => resolve(getJson(url)))
@@ -78,6 +81,7 @@ exports.create = ({ org, repo }) => {
   const getGhJson = ({ path, query }) => {
     const url = getGhUrl({ path, query })
 
+console.log('getting', url)
     return getJson(url)
   }
 

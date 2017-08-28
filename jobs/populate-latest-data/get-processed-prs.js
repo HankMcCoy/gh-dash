@@ -6,53 +6,37 @@ const flow = require('lodash/fp/flow')
 const sortBy = require('lodash/fp/sortBy')
 const first = require('lodash/fp/first')
 const parseLinkHeader = require('parse-link-header')
+const delay = require('./delay')
 
-let xhr
-
-function getProcessedPrs({ url, org, repo }) {
-  xhr = require('./xhr').create({ org, repo })
-
-  let next
-  return getPrNumbers({ url })
-    .then(({ next: nextArg, numbers }) => {
-      next = nextArg
-      return getActualPrsWithEvents(numbers)
-    })
-    .then(prsAndEvents => createFinalPrObjs({
-      org,
-      prsAndEvents,
-      repo,
-    }))
-    .then(prs => ({ next, prs }))
-}
-
-function getPrNumbers({ url }) {
-  return xhr.getJson(url).then(({ headers, body: prs }) => {
-    const next = parseLinkHeader(headers.link).next
-    return {
-      next,
-      numbers: prs.map(pr => pr.number),
-    }
+exports.getProcessedPrsByNumbers = async ({ numbers, xhr, org, repo }) => {
+  const prsAndEvents = await getActualPrsWithEvents(numbers, xhr)
+  return await createFinalPrObjs({
+    org,
+    prsAndEvents,
+    repo,
   })
 }
 
-function getActualPrsWithEvents(prNumbers) {
-  return Promise.all(
-    prNumbers.map(number =>
-      Promise.all([
-        xhr.getGhJson({
-          path: `pulls/${number}`,
-        }).then(({ body }) => body),
-        xhr.getGhJson({
-          path: `issues/${number}`,
-        }).then(({ body }) => body),
-        xhr.getGhJson({
-          path: `issues/${number}/timeline`,
-          query: { per_page: '100' },
-        }).then(({ body }) => body),
-      ]).then(([pr, issue, events]) => ({ pr, issue, events }))
-    )
-  )
+async function getActualPrsWithEvents(prNumbers, xhr) {
+  await delay(1000)
+  const results = []
+  for (let i = 0; i < prNumbers.length; i++) {
+    const number = prNumbers[i]
+    const pr = await xhr.getGhJson({ path: `pulls/${number}` })
+      .then(({ body }) => body)
+    await delay(1000)
+    const issue = await xhr.getGhJson({ path: `issues/${number}` })
+      .then(({ body }) => body)
+    await delay(1000)
+    const events = await xhr.getGhJson({
+      path: `issues/${number}/timeline`,
+      query: { per_page: '100' },
+    })
+      .then(({ body }) => body)
+
+    results.push({ pr, issue, events })
+  }
+  return results
 }
 
 const filterEventsByLabel = (events, label) =>
@@ -130,5 +114,3 @@ function createFinalPrObjs({ org, prsAndEvents, repo }) {
     }
   })
 }
-
-module.exports = getProcessedPrs
