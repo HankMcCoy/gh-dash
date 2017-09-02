@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { Div } from 'glamorous'
-import { VictoryAxis, VictoryBar, VictoryChart, VictoryGroup } from 'victory'
+import { VictoryAxis, VictoryBar, VictoryChart, VictoryStack } from 'victory'
 
 import SectionHeader from './section-header'
 import Spacer from './spacer'
@@ -34,19 +34,20 @@ const ReviewTimes = ({ org, repo, startDate }) => {
               Avg time waiting for PRs (by week)
             </SectionHeader>
             <Spacer height="10px" />
-            <Div height="300px">
+            <Div height="600px">
               {reviewTimes
-                ? <VictoryChart domainPadding={20}>
+                ? <VictoryChart domainPadding={20} height={600}>
                     <VictoryAxis
+                      tickValues={reviewTimes.map(t => t._id)}
                       tickFormat={reviewTimes.map(t => `Week ${t._id}`)}
                     />
                     <VictoryAxis
                       dependentAxis
                       tickFormat={x => `${Math.round(x / 1000 / 60 / 60)} hrs`}
                     />
-                    <VictoryGroup
+                    <VictoryStack
                       offset={8}
-                      style={{ data: { width: 4 } }}
+                      style={{ data: { width: 16 } }}
                       colorScale={colorScale}
                     >
                       <VictoryBar
@@ -64,7 +65,7 @@ const ReviewTimes = ({ org, repo, startDate }) => {
                         x="_id"
                         y="afterReviewBeforeMerge"
                       />
-                    </VictoryGroup>
+                    </VictoryStack>
                   </VictoryChart>
                 : 'Loading…'}
             </Div>
