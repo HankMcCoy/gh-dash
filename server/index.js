@@ -15,6 +15,15 @@ const getSortedDistinct = attr => {
     .then(values => values.filter(x => x).sort(caseInsensitiveCompare))
 }
 
+const filterByRepo = (query, repo) => {
+  return repo ?
+    {
+      ...query,
+      repo,
+    } :
+    query
+}
+
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '../client/index.html'))
 })
@@ -32,13 +41,14 @@ app.get('/api/repos', (req, res) => {
 app.get('/api/pull-requests', (req, res) => {
   const { org, repo } = req.query
 
+  const mongoQuery = filterByRepo({
+    dateClosed: null,
+    org,
+  }, repo)
+
   db
     .collection('pullRequests')
-    .find({
-      dateClosed: null,
-      org,
-      repo,
-    })
+    .find(mongoQuery)
     .toArray((err, prs) => {
       res.send({ pullRequests: prs })
     })
@@ -61,16 +71,17 @@ app.get('/api/reviewer-leader-board', (req, res) => {
 })
 
 const getLeaderBoard = ({ type, org, repo, startDate }) => {
+  const matchQuery = filterByRepo({
+    dateMerged: { $gt: new Date(startDate) },
+    org,
+  }, repo)
+
   return new Promise((resolve, reject) => {
     db
       .collection('pullRequests')
       .aggregate([
         {
-          $match: {
-            dateMerged: { $gt: new Date(startDate) },
-            repo,
-            org,
-          },
+          $match: matchQuery,
         },
         {
           $addFields: {
@@ -114,15 +125,16 @@ const getLeaderBoard = ({ type, org, repo, startDate }) => {
 app.get('/api/review-times', (req, res) => {
   const { org, repo, startDate } = req.query
 
+  const matchQuery = filterByRepo({
+    dateMerged: { $gt: new Date(startDate) },
+    org,
+  }, repo)
+
   db
     .collection('pullRequests')
     .aggregate([
       {
-        $match: {
-          dateMerged: { $gt: new Date(startDate) },
-          repo,
-          org,
-        },
+        $match: matchQuery,
       },
       {
         $group: {
@@ -156,13 +168,12 @@ app.get('/api/revisions-by-author/:author', (req, res) => {
     .collection('pullRequests')
     .aggregate([
       {
-        $match: {
+        $match: filterByRepo({
           author,
           gtgReviewer: { $ne: null },
           dateMerged: { $gt: new Date(startDate) },
           org,
-          repo,
-        },
+        }, repo),
       },
       {
         $group: {
@@ -189,12 +200,11 @@ app.get('/api/revisions-by-reviewer/:reviewer', (req, res) => {
     .collection('pullRequests')
     .aggregate([
       {
-        $match: {
+        $match: filterByRepo({
           gtgReviewer: reviewer,
           dateMerged: { $gt: new Date(startDate) },
           org,
-          repo,
-        },
+        }, repo),
       },
       {
         $group: {

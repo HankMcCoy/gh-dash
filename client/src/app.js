@@ -18,7 +18,6 @@ const App = ({ org, repo, startDate, setOrg, setRepo, setStartDate }) => {
       <SiteHeader {...readOnlyProps} {...{ setOrg, setRepo, setStartDate }} />
       <SiteContent>
         {org &&
-          repo &&
           <Div>
             <LeaderBoard type="author" {...readOnlyProps} />
             <LeaderBoard type="reviewer" {...readOnlyProps} />
