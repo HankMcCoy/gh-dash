@@ -63,7 +63,9 @@ async function getPrNumbersWeDontHaveYet() {
     .toArray()
 
   while (url) {
-    const { headers, body: prs } = await xhr.getJson(url)
+    const response = await xhr.getJson(url)
+    const { headers, body: prs } = response
+console.log('Got response', response)
     // Add all PR numbers newer than what we have
     const newPrNumbers = prs
       .map(pr => +pr.number)
@@ -74,8 +76,9 @@ async function getPrNumbersWeDontHaveYet() {
       )
     openPrNumbers = openPrNumbers.concat(newPrNumbers)
     // If all PR numbers are newer than what we already have, go fetch another page.
+    const parsedLinkHeader = headers.link && parseLinkHeader(headers.link)
     url = newPrNumbers.length === prs.length
-      ? parseLinkHeader(headers.link).next.url
+      ? _.get(parsedLinkHeader, 'next.url')
       : null
   }
 
@@ -91,6 +94,7 @@ async function getPrsNumbersWeThinkAreOpen() {
       dateClosed: null,
     })
     .toArray()
+  console.log('Got PRs we think are open')
 
   return prsWeThinkAreOpen.map(pr => pr.number)
 }

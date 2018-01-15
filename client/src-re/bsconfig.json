@@ -1,4 +1,4 @@
-/* This is the BuckleScript configuration file. Note that this is a comment;
+/* This is the BuckleSbucklescriptcript configuration file. Note that this is a comment;
   BuckleScript comes with a JSON parser that supports comments and trailing
   comma. If this screws with your editor highlighting, please tell us by filing
   an issue! */
@@ -17,7 +17,8 @@
   "bs-dependencies": [
     "reason-react",
 		"bs-fetch",
-		"bs-json"
+		"bs-json",
+    "bs-glamor"
   ],
   "refmt": 3
 }
