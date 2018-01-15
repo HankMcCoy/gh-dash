@@ -8,6 +8,7 @@ var Curry                 = require("bs-platform/lib/js/curry.js");
 var React                 = require("react");
 var Glamor                = require("bs-glamor/src/glamor.js");
 var ReasonReact           = require("reason-react/src/ReasonReact.js");
+var Spacer$ReactTemplate  = require("./Spacer.bs.js");
 var OrgData$ReactTemplate = require("./OrgData.bs.js");
 
 function str(prim) {
@@ -36,7 +37,15 @@ var root = Glamor.css(/* :: */[
       ]
     ]);
 
-var Styles = /* module */[/* root */root];
+var label = Glamor.css(/* :: */[
+      Glamor.display("flex"),
+      /* [] */0
+    ]);
+
+var Styles = /* module */[
+  /* root */root,
+  /* label */label
+];
 
 function make() {
   var newrecord = component.slice();
@@ -51,11 +60,17 @@ function make() {
       var state = param[/* state */2];
       return React.createElement("div", {
                   className: root
-                }, React.createElement("label", undefined, "Org", React.createElement("select", undefined, $$Array.of_list(List.map((function (org) {
+                }, React.createElement("label", {
+                      className: label
+                    }, "Org", ReasonReact.element(/* None */0, /* None */0, Spacer$ReactTemplate.make(/* Some */["5px"], /* None */0, /* array */[])), React.createElement("select", undefined, $$Array.of_list(List.map((function (org) {
                                     return React.createElement("option", undefined, org);
-                                  }), state[/* orgs */0])))), React.createElement("label", undefined, "Repo", React.createElement("select", undefined, $$Array.of_list(List.map((function (org) {
+                                  }), state[/* orgs */0])))), ReasonReact.element(/* None */0, /* None */0, Spacer$ReactTemplate.make(/* Some */["10px"], /* None */0, /* array */[])), React.createElement("label", {
+                      className: label
+                    }, "Repo", ReasonReact.element(/* None */0, /* None */0, Spacer$ReactTemplate.make(/* Some */["5px"], /* None */0, /* array */[])), React.createElement("select", undefined, $$Array.of_list(List.map((function (org) {
                                     return React.createElement("option", undefined, org);
-                                  }), state[/* orgs */0])))));
+                                  }), state[/* orgs */0])))), ReasonReact.element(/* None */0, /* None */0, Spacer$ReactTemplate.make(/* Some */["10px"], /* None */0, /* array */[])), React.createElement("label", {
+                      className: label
+                    }, "Time-span", ReasonReact.element(/* None */0, /* None */0, Spacer$ReactTemplate.make(/* Some */["5px"], /* None */0, /* array */[])), React.createElement("select", undefined, React.createElement("option", undefined), React.createElement("option", undefined, "1 week"), React.createElement("option", undefined, "2 week"), React.createElement("option", undefined, "4 week"), React.createElement("option", undefined, "8 week"), React.createElement("option", undefined, "16 week"))));
     });
   newrecord[/* initialState */10] = (function () {
       return /* record */[/* orgs : [] */0];

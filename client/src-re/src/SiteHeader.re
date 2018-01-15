@@ -20,6 +20,10 @@ module Styles {
     alignItems("center"),
     padding("0 20px")
   ]);
+
+  let label = css([
+    display("flex")
+  ])
 };
 
 let make = (_children) => {
@@ -45,8 +49,9 @@ let make = (_children) => {
   },
   render: ({ state }) =>
     <div className=Styles.root>
-      <label>
+      <label className=Styles.label>
         (str("Org"))
+        <Spacer width="5px" />
         <select>
           (state.orgs
             |> List.map((org) =>
@@ -55,14 +60,29 @@ let make = (_children) => {
             |> ReasonReact.arrayToElement)
         </select>
       </label>
-      <label>
+      <Spacer width="10px" />
+      <label className=Styles.label>
         (str("Repo"))
+        <Spacer width="5px" />
         <select>
           (state.orgs
             |> List.map((org) =>
               (<option>(str(org))</option>))
             |> Array.of_list
             |> ReasonReact.arrayToElement)
+        </select>
+      </label>
+      <Spacer width="10px" />
+      <label className=Styles.label>
+        (str("Time-span"))
+        <Spacer width="5px" />
+        <select>
+          <option></option>
+          <option>(str("1 week"))</option>
+          <option>(str("2 week"))</option>
+          <option>(str("4 week"))</option>
+          <option>(str("8 week"))</option>
+          <option>(str("16 week"))</option>
         </select>
       </label>
     </div>
