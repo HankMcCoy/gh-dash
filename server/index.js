@@ -1,4 +1,5 @@
 const express = require('express')
+const cors = require('cors')
 const _ = require('lodash')
 const path = require('path')
 const app = express()
@@ -7,6 +8,8 @@ const MongoClient = require('mongodb').MongoClient
 const mongoConnectionStr = 'mongodb://localhost:27017/gh-dash'
 
 let db
+
+app.use(cors())
 
 const getSortedDistinct = attr => {
   return db
