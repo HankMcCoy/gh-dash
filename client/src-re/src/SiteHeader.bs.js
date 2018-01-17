@@ -48,7 +48,7 @@ var Styles = /* module */[
   /* label */label
 ];
 
-function make() {
+function make(setOrg, setRepo, _) {
   var newrecord = component.slice();
   newrecord[/* didMount */4] = (function (self) {
       OrgData$ReactTemplate.fetchAll(/* () */0).then((function (orgs) {
@@ -67,11 +67,19 @@ function make() {
                   className: root
                 }, React.createElement("label", {
                       className: label
-                    }, "Org", ReasonReact.element(/* None */0, /* None */0, Spacer$ReactTemplate.make(/* Some */["5px"], /* None */0, /* array */[])), React.createElement("select", undefined, React.createElement("option", undefined), Util$ReactTemplate.listToElement(List.map((function (org) {
+                    }, "Org", ReasonReact.element(/* None */0, /* None */0, Spacer$ReactTemplate.make(/* Some */["5px"], /* None */0, /* array */[])), React.createElement("select", {
+                          onChange: (function ($$event) {
+                              return Curry._1(setOrg, Util$ReactTemplate.getTarget($$event).value);
+                            })
+                        }, React.createElement("option", undefined), Util$ReactTemplate.listToElement(List.map((function (org) {
                                     return React.createElement("option", undefined, org);
                                   }), state[/* orgs */0])))), ReasonReact.element(/* None */0, /* None */0, Spacer$ReactTemplate.make(/* Some */["10px"], /* None */0, /* array */[])), React.createElement("label", {
                       className: label
-                    }, "Repo", ReasonReact.element(/* None */0, /* None */0, Spacer$ReactTemplate.make(/* Some */["5px"], /* None */0, /* array */[])), React.createElement("select", undefined, React.createElement("option", undefined), Util$ReactTemplate.listToElement(List.map((function (repo) {
+                    }, "Repo", ReasonReact.element(/* None */0, /* None */0, Spacer$ReactTemplate.make(/* Some */["5px"], /* None */0, /* array */[])), React.createElement("select", {
+                          onChange: (function ($$event) {
+                              return Curry._1(setRepo, Util$ReactTemplate.getTarget($$event).value);
+                            })
+                        }, React.createElement("option", undefined), Util$ReactTemplate.listToElement(List.map((function (repo) {
                                     return React.createElement("option", undefined, repo);
                                   }), state[/* repos */1])))), ReasonReact.element(/* None */0, /* None */0, Spacer$ReactTemplate.make(/* Some */["10px"], /* None */0, /* array */[])), React.createElement("label", {
                       className: label

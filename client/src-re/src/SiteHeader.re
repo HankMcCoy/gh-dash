@@ -27,7 +27,7 @@ module Styles {
   ])
 };
 
-let make = (_children) => {
+let make = (~setOrg, ~setRepo, _children) => {
   ...component,
   initialState: () => {
     orgs: [],
@@ -62,7 +62,9 @@ let make = (_children) => {
       <label className=Styles.label>
         (str("Org"))
         <Spacer width="5px" />
-        <select>
+        <select
+          onChange={(event) => setOrg(Util.getTarget(event)##value)}
+        >
           <option></option>
           (state.orgs
             |> List.map((org) =>
@@ -74,7 +76,9 @@ let make = (_children) => {
       <label className=Styles.label>
         (str("Repo"))
         <Spacer width="5px" />
-        <select>
+        <select
+          onChange={(event) => setRepo(Util.getTarget(event)##value)}
+        >
           <option></option>
           (state.repos
             |> List.map((repo) =>
