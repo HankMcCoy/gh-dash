@@ -1,11 +1,12 @@
 let str = ReasonReact.stringToElement;
-
 type state = {
-  orgs: list(string)
+  orgs: list(string),
+  repos: list(string)
 };
 
 type action =
-  | LoadOrgs(list(string));
+  | LoadOrgs(list(string))
+  | LoadRepos(list(string));
 
 let component = ReasonReact.reducerComponent("SiteHeader");
 
@@ -29,22 +30,31 @@ module Styles {
 let make = (_children) => {
   ...component,
   initialState: () => {
-    orgs: []
+    orgs: [],
+    repos: [],
   },
-  reducer: (action, _state) => {
+  reducer: (action, state) => {
     switch (action) {
-    | LoadOrgs(orgs) => ReasonReact.Update({orgs: orgs})
+    | LoadOrgs(orgs) => ReasonReact.Update({...state, orgs: orgs})
+    | LoadRepos(repos) => ReasonReact.Update({...state, repos: repos})
     }
   },
   didMount: (self) => {
-    Js.Promise.(
+    Js.Promise.({
       OrgData.fetchAll()
       |> then_((orgs) => {
         self.send(LoadOrgs(orgs));
         resolve()
       })
-      |> ignore
-    );
+      |> ignore;
+
+      RepoData.fetchAll()
+      |> then_((repos) => {
+        self.send(LoadRepos(repos));
+        resolve()
+      })
+      |> ignore;
+    });
     ReasonReact.NoUpdate;
   },
   render: ({ state }) =>
@@ -53,11 +63,11 @@ let make = (_children) => {
         (str("Org"))
         <Spacer width="5px" />
         <select>
+          <option></option>
           (state.orgs
             |> List.map((org) =>
               (<option>(str(org))</option>))
-            |> Array.of_list
-            |> ReasonReact.arrayToElement)
+            |> Util.listToElement)
         </select>
       </label>
       <Spacer width="10px" />
@@ -65,11 +75,11 @@ let make = (_children) => {
         (str("Repo"))
         <Spacer width="5px" />
         <select>
-          (state.orgs
-            |> List.map((org) =>
-              (<option>(str(org))</option>))
-            |> Array.of_list
-            |> ReasonReact.arrayToElement)
+          <option></option>
+          (state.repos
+            |> List.map((repo) =>
+              (<option>(str(repo))</option>))
+            |> Util.listToElement)
         </select>
       </label>
       <Spacer width="10px" />
